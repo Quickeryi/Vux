@@ -49,8 +49,7 @@
              */
             close () {
                 this.clearCloseTimer();
-                this.onAfter();
-                this.$parent.close(this.name);
+                this.$parent.close(this.name, this.onAfter);
             }
         },
         mounted() {
@@ -70,14 +69,18 @@
 </script>
 
 <template>
-    <transition :name="transitionName">
+    <transition :name="transitionName" :style="{color: 'red'}">
         <!-- tips content -->
-        <div :style="styles">
+        <div :style="styles" class="tips-content-warp">
             <div v-html="content"></div>
         </div>
     </transition>
 </template>
 
-<style scoped>
-
+<style lang="sass">
+    .tips-content-warp {
+        border-radius: .3rem;
+        padding: .4rem .8rem;
+        text-align: center;
+    }
 </style>

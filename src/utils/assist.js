@@ -4,6 +4,7 @@
  *
  * @data 2017/3/25.
  */
+import Vue from 'vue';
 class VuxUtil {
     /**
      * Conversion the `camelCase` to `camel-case`
@@ -14,6 +15,12 @@ class VuxUtil {
     static camelcaseToHyphen(str) {
         return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
     }
+
+    /**
+     * EventBus
+     * @type {Vue}
+     */
+    static EventBus = new Vue();
 }
 
 export default VuxUtil;

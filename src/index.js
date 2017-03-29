@@ -7,7 +7,7 @@
 import Tips from './components/tips';
 
 const vux = {
-    Tips
+
 };
 
 /**
@@ -38,9 +38,9 @@ if (typeof window != void(0) && window.Vue) {
 
 /**
  * export Vux
- * 定义 vux.install 方法, 模块化调用Vue.install(vux)时，会自动调用该方法
+ * 定义 vux.install 方法, 模块化调用Vue.use(vux)时，会自动调用该方法
  *
  * @type {*}
  */
-module.exports = Object.assign(vux, {install});
+export default Object.assign(vux, {install});
 

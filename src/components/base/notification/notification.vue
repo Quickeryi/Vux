@@ -4,11 +4,11 @@
      * 分发Tips消息组件
      */
     'use strict';
+    import Notice from './notice.vue';
     let uuid = 0;
     let getUuid = () => {
         return `vuxnotification_${Date.now()}_${uuid++}`;
     };
-    import Notice from './notice.vue';
     export default {
         components: {
             Notice
@@ -41,15 +41,16 @@
              * 消息出对列
              *
              * @param name 对应的消息标识
+             * @param cb
              */
-            close(name) {
+            close(name, cb) {
                 const notices = this.notices;
-                for (let notice of notices) {
+                notices.forEach((notice, index) => {
                     if (notice.name === name) {
-                        this.notices.splice(i, 1);
-                        break;
+                        notices.splice(index, 1);
                     }
-                }
+                });
+                cb && cb();
             }
         }
     }
@@ -71,11 +72,13 @@
     </div>
 </template>
 
-<style scoped>
+<style>
     .vux-tips {
         position: fixed;
         z-index: 10000;
-        width: 100%;
-        left: 0
+        left: 50%;
+        transform: translate3d(-50%, 0, 0);
+        min-width: 40%;
+        width: auto;
     }
 </style>

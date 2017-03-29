@@ -30,12 +30,19 @@ Notification.newInstance = (properties = {}) => {
      *
      */
     const notification = new Vue({ // 当前实例的直接子组件 (即: Notification)
-        el: div,
+        el: div, // 挂载到具体的HTMLElement, 实例将立即进入编译过程
         data: _props,
-        components: {Notification}
+        components: {Notification},
+        mounted() {
+            let that = this;
+            VuxUtil.EventBus.$on('reset-styles', (newValue) => {
+                that.styles = newValue;
+            });
+        }
     }).$children[0];
 
     return {
+        notification,
         notice(noticeProps) {
             notification.add(noticeProps);
         },

@@ -6,6 +6,7 @@
  * @data 2017/3/25.
  */
 import Notification from '../base/notification';
+import VuxUtil from '../../utils/assist';
 
 let defaultOpt = {
     direction: 'b2t',        // 运动方向
@@ -20,28 +21,39 @@ let tipsInstance;
 let name = 1;
 let prefixKey = 'vux-tips-';
 
+let resizePosition = (args) => {
+    let {
+        direction,
+        distance
+    } = args;
+    let _pos = '';
+    /**
+     * 当tip进入的方向为b2t (bottom -> top)时，设置的distance为 bottom定位的值
+     * 否则，则为top的定位值
+     *
+     */
+    switch (direction) {
+        case 'b2t':
+            _pos = 'bottom';
+            break;
+        default:
+            _pos = 'top';
+            break;
+
+    }
+    return {
+        [_pos]: distance
+    };
+};
+
 /**
  * 获取Tips实例
  *
  * 单例模式
  */
-let getTipsInstance = () => {
+let getTipsInstance = (args) => {
     let styles = {};
-    let position = (() => {
-        let _pos = '';
-        switch (defaultOpt.direction) {
-            case 'b2t':
-                _pos = 'bottom';
-                break;
-            default:
-                _pos = 'top';
-                break;
-
-        }
-        return {
-            [_pos]: defaultOpt.distance
-        };
-    })();
+    let position = resizePosition(args);
     Object.assign(styles, position);
     tipsInstance = tipsInstance || Notification.newInstance({
         styles
@@ -54,14 +66,26 @@ let notice = (...args) => {
     let [
         type,
         content,
-        duration,
-        tween,
-        color,
-        bg,
-        fontSize,
+        {
+            direction,
+            distance,
+            duration,
+            tween,
+            color,
+            bg,
+            fontSize
+        },
         after
-    ] = [...args];
-    let instance = getTipsInstance(); // 获取Notification实例
+    ] = [...args]; // 解构赋值
+
+    let instance = getTipsInstance({
+        direction,
+        distance
+    }); // 获取Notification实例
+    VuxUtil.EventBus.$emit('reset-styles', resizePosition({
+        direction,
+        distance
+    }));
     instance.notice({
         content: `
             <div>
@@ -72,13 +96,29 @@ let notice = (...args) => {
         styles: {
             color: color,
             background: bg,
-            fontSize: fontSize,
-            left: '50%'
+            fontSize: fontSize
         },
         name: `${prefixKey}${name}`,
         duration,
         after,
-        transitionName: 'move-up'
+        transitionName: (() => {
+            let transitionDirection = 'down';
+            switch (direction) {
+                case 'l2r':
+                    transitionDirection = 'left';
+                    break;
+                case 'r2l':
+                    transitionDirection = 'right';
+                    break;
+                case 'b2t':
+                    transitionDirection = 'down';
+                    break;
+                case 't2b':
+                    transitionDirection = 'up';
+                    break;
+            }
+            return `move-${transitionDirection}`;
+        })()
     });
 
     // 用于手动清除
@@ -113,9 +153,9 @@ export default {
             fontSize  = defaultOpt.fontSize   // 字体大小
         } = {}
     ) {
-        let args = arguments;
-        defaultOpt.keys((key) => {
-            defaultOpt[key] = args[key];
+        let args = {...arguments}[0];
+        Object.keys(defaultOpt).forEach((key) => {
+            defaultOpt[key] = args[key] || defaultOpt[key];
         });
     },
 
@@ -123,6 +163,8 @@ export default {
      * 展示成功信息
      *
      * @param content       内容
+     * @param direction
+     * @param distance
      * @param duration      自动关闭的延时，单位秒，调用时传值则会覆盖全局配置
      * @param tween         运动速度曲线，调用时传值则会覆盖全局配置
      * @param color
@@ -132,19 +174,38 @@ export default {
      */
     success(
         content,
-        duration  = defaultOpt.duration,
-        tween     = defaultOpt.tween,
-        color     = defaultOpt.color,
-        bg        = defaultOpt.bg,
-        fontSize  = defaultOpt.fontSize,
-        after     = () => {},
+        {
+            direction = defaultOpt.direction,
+            distance  = defaultOpt.distance,
+            duration  = defaultOpt.duration,
+            tween     = defaultOpt.tween,
+            color     = defaultOpt.color,
+            bg        = defaultOpt.bg,
+            fontSize  = defaultOpt.fontSize,
+        } = {},
+        after = () => {}
     ) {
-        return notice('success', ...arguments);
+        return notice(
+            'success',
+            content,
+            {
+                direction,
+                distance,
+                duration,
+                tween,
+                color,
+                bg,
+                fontSize
+            },
+            after
+        );
     },
 
     /**
      * 展示error信息
      *
+     * @param direction
+     * @param distance
      * @param content       内容
      * @param duration      自动关闭的延时，单位秒，调用时传值则会覆盖全局配置
      * @param tween         运动速度曲线，调用时传值则会覆盖全局配置
@@ -155,19 +216,38 @@ export default {
      */
     error(
         content,
-        duration  = defaultOpt.duration,
-        tween     = defaultOpt.tween,
-        color     = defaultOpt.color,
-        bg        = defaultOpt.bg,
-        fontSize  = defaultOpt.fontSize,
-        after     = () => {},
+        {
+            direction = defaultOpt.direction,
+            distance  = defaultOpt.distance,
+            duration  = defaultOpt.duration,
+            tween     = defaultOpt.tween,
+            color     = defaultOpt.color,
+            bg        = defaultOpt.bg,
+            fontSize  = defaultOpt.fontSize,
+        } = {},
+        after = () => {}
     ) {
-        return notice('error', ...arguments);
+        return notice(
+            'error',
+            content,
+            {
+                direction,
+                distance,
+                duration,
+                tween,
+                color,
+                bg,
+                fontSize
+            },
+            after
+        );
     },
 
     /**
      * 展示loading信息
      *
+     * @param direction
+     * @param distance
      * @param content       内容
      * @param duration      自动关闭的延时，单位秒，调用时传值则会覆盖全局配置
      * @param tween         运动速度曲线，调用时传值则会覆盖全局配置
@@ -178,13 +258,30 @@ export default {
      */
     loading(
         content,
-        duration  = defaultOpt.duration,
-        tween     = defaultOpt.tween,
-        color     = defaultOpt.color,
-        bg        = defaultOpt.bg,
-        fontSize  = defaultOpt.fontSize,
-        after     = () => {},
+        {
+            direction = defaultOpt.direction,
+            distance  = defaultOpt.distance,
+            duration  = defaultOpt.duration,
+            tween     = defaultOpt.tween,
+            color     = defaultOpt.color,
+            bg        = defaultOpt.bg,
+            fontSize  = defaultOpt.fontSize,
+        } = {},
+        after = () => {}
     ) {
-        return notice('loading', ...arguments);
+        return notice(
+            'loading',
+            content,
+            {
+                direction,
+                distance,
+                duration,
+                tween,
+                color,
+                bg,
+                fontSize
+            },
+            after
+        );
     },
 };
