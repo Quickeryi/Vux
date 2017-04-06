@@ -7,7 +7,15 @@
 import Tips from './components/tips';
 
 const vux = {
+    components: {
 
+    },
+    filters: {
+
+    },
+    directives: {
+
+    }
 };
 
 /**
@@ -21,8 +29,22 @@ const install = (Vue, opts = {}) => {
     /**
      * 注册全局组件
      */
-    Object.keys(vux).forEach((key) => {
+    Object.keys(vux.components).forEach((key) => {
         Vue.component(key, vux[key]);
+    });
+
+    /**
+     * 注册全局过滤器
+     */
+    Object.keys(vux.filters).forEach((key) => {
+        Vue.filter(key, vux[key]);
+    });
+
+    /**
+     * 注册全局指令
+     */
+    Object.keys(vux.directives).forEach((key) => {
+        Vue.directive(key, vux[key]);
     });
 
     //添加 Vue 实例方法
